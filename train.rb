@@ -24,18 +24,15 @@ class Train
     @current_station = @route.stations.first
   end
 
+ 
   def go_next_station
     @current_station = @route.stations[@route.stations.index(@current_station) + 1]
   end
 
   def go_previous_station
-    @current_station = @route.stations[@route.stations.index(@current_station) - 1]
+    @current_station = @route.station[@route.stations.index(@current_station) - 1]
   end
 
-  def previous_station
-    return unless @route
-    @route.stations[@route.stations.index(@current_station) - 1]
-  end
 
   def current_station
     return unless @route
