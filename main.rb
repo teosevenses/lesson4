@@ -16,185 +16,147 @@ class Main
 		@stations = []
 	end
 
-def start 
-	puts "Управление поездами"
-    loop do
-    	menu 
-    	choice = gets.chomp
-    	break if choice == "9"
-    	list(choice)
-    end		
+	def start 
+		puts "Управление поездами"
+    	loop do
+    		menu 
+    		choice = gets.chomp
+    		break if choice == "9"
+    		list(choice)
+    	end		
+	end
+
+	private 
+
+	attr_reader :trains, :stations, :routes, :wagons
+
+	def menu 
+		puts "
+		1 - Создать станцию
+		2 - Создать поезда
+		3 - Создать маршруты
+		4 - Добавить станцию на маршрут
+		5 - Удалить станцию с маршрута
+		6 - Список маршрутов
+		7 - Просматривать список станций
+		8 - Просматривать список поездов
+		9 - Выйти из меню
+		"
+	end
+
+	def list(choice)
+		if choice == "1"
+			create_station
+		elsif choice == "2"
+			create_train
+		elsif choice == "3"
+			create_route
+		elsif choice == "4"
+			add_route
+		elsif choice == "5"
+			delete_route
+		elsif choice == "6"
+			list_routes
+		elsif choice == "7"
+			list_stations
+		elsif choice == "8"
+			trains.each do |x|
+				puts "Номер поезда #{x.num}, тип поезда #{x.type}" 
+			end
+	end
+		
+	end
+
+	def create_station
+		puts "Введите название станции"
+		name = gets.chomp
+		station = Station.new(name)
+		puts "Произошло создание станции #{name}"
+		stations << station
+	end
+
+	def create_train
+		puts "Введите тип поезда
+				0 - Грузовой
+				1 - Пассажирский"
+		type = gets.chomp
+		num = trains.count + 1
+		if type == "0" 
+			train = CargoTrain.new(num)
+			puts "Создан грузовой поезд"
+			trains << train
+		elsif type == "1"
+			train = PassengerTrain.new(num)
+			puts "Создан пассажирский поезд"
+			trains << train
+		else 
+			puts "Ошибка"
+		end
+	end
+
+
+	def list_stations
+		puts "Список станций"
+		stations.each_with_index do |x, y| 
+			puts "#{y}. #{x.name}"
+		end
+
+	end 
+ 	
+ 	def create_route
+ 		puts "Выберите начальную станцию по номеру из списка ниже"
+ 		list_stations
+ 		input = gets.chomp
+ 		start_station = stations[input.to_i]
+ 		puts "Выберите конечную станцию по номеру из списка ниже"
+ 		list_stations
+ 		second_input = gets.chomp
+ 		finish_station = stations[second_input.to_i]
+ 		route = Route.new(start_station, finish_station)
+ 		puts "Создан маршрут поезда"
+ 		routes << route
+ 	end
+ 	
+ 	def list_routes
+ 		puts "Список маршрутов"
+ 		routes.each_with_index do |x, y|
+ 			puts "#{y} #{x.readable_stations}"
+ 		end
+ 	end
+
+ 	def add_route
+ 		puts "Выберите станцию и маршрут"
+ 		list_routes
+ 		input = gets.chomp
+ 		route = routes[input.to_i]
+
+ 		list_stations
+ 		second_input = gets.chomp
+ 		station = stations[second_input.to_i]
+ 		route.add_station(station)
+ 		puts "Выбранная станция добавлена в маршрут"
+ 	end
+
+ 	def delete_route
+ 		puts "Выберите станцию и маршрут"
+
+		list_routes
+ 		input = gets.chomp
+ 		route = routes[input.to_i]
+
+ 		list_stations
+ 		second_input = gets.chomp
+ 		station = stations[second_input.to_i]
+ 		
+		if route.stations.include?(station)
+     	route.delete_station(station)
+     	puts "Выбранная станция удалена из маршрута"
+  	 	else
+    	puts "Выбранная станция не найдена в выбранном маршруте"
+   	end
+   	
+   	end
 end
 
-private 
-
-attr_reader :trains, :stations, :routes, :wagons
-
-def menu 
-	puts "
-	1 - Создать станцию
-	2 - Создать поезда
-	3 - Создать маршруты и управлять станциями в нем (добавлять, удалять)
-	4 - Назначать маршрут поезду
-	5 - Добавлять вагоны к поезду, отцеплять вагоны
-	6 - Перемещать поезд по маршруту вперед и назад
-	7 - Просматривать список станций
-	8 - Просматривать список поездов
-	9 - Выйти из меню
-	"
-end
-
-def list(ch)
-	create_station if ch == "1"
-	create_train if ch == "2"
-	create_management_stations if ch == "3"
-	assign_route if ch == "4"
-	management_wagon if ch == "5"
-	move_train if ch == "6"
-	show_stations if ch == "7"
-	show_trains if ch == "8"
-end
-
-
-def create_station
-	puts "Создать станцию"
-	name = gets.chomp
-	station = Station.new(name)
-	@stations << station
-	puts "Создана новая станция #{name}"
-end
-
-def create_train 
-	puts "Создание нового поезда"
-	num = gets.chomp
-	puts "Выберите тип поезда"
-	puts "Тип поезда
-		0 - Грузовой
-		1 - Пассажирский"
-	type = gets.chomp
-	train = type == "0"? Cargotrain.new(num) : Passengertrain.new(num)
-	@trains << train
-	puts "Создан новый поезд #{train.inspect} номер #{train.num}"
-end
-
-def assign_route
-    puts "Управление маршрутами
-
-            1 - Создать маршрут
-            2 - Добавить станцию в существующем маршруте
-            3 - Удалить станцию в существующем маршруте"
-
-    num_route = gets.chomp
-    create_route if num == "1"
-    add_station_in_route if num == "2"
-    delete_station if num == "3"
- end
-
-def create_management_stations 
-	puts "Создание маршрутов"
-	first_station = gets.chomp
-	finish_station = gets.chomp
-	route = Route.new(first_station, finish_station)
-	@routes << route
-	puts "Новый маршрут #{route.inspect} создан"
-end
-
-def add_station_in_the_route
-	puts "Добавление станции"
-	@stations.each_with_index {|element, index|
-	puts "Станция - #{element.name} - индекс - #{index}"}
-	station = @stations[gets.chomp.to_i]
-
-	puts "Добавление маршрута"
-	@routes.each_with_index {|element, index|
-	puts "Маршрут - #{element.inspect}, индекс - #{index}"}
-	route = @routes [gets.chomp.to_i]
-	route.add_station(station)
-	puts "Станция #{station.name} добавлена в маршрут #{route.inspect}"
-end
-
-def delete_station
-	puts "Выбор удаляемой станции"
-	@stations.each_with_index {|element, index|
-	puts "Станция - #{element}, индекс - #{index}"}
-	station = @stations[gets.chomp.to_i]
-	puts "Выбор удаляемого маршрута"
-	@route.each_with_index {|element, index|
-	puts "Маршрут - #{element}, индекс - #{index}"}
-	route = @routes[gets.chomp.to_i]
-end
-
-def assign_route
-	puts "Назначение маршрута поезда"
-	@trains.each_with_index {|element, index|
-	puts "Поезд - #{element}, индекс - #{index}"}
-	train = @trains[gets.chomp.to_i]
-	puts "Выбор маршрута поезда"
-	@routes.each_with_index {|element, index|
-	puts "Маршрут - #{element}, индекс - #{index}"}
-	route = @routes[gets.chomp.to_i]
-end
-
-def management_wagon
-	puts "Управление вагонами"
-	puts "0 - Создание вагона"
-	     "1 - Добавить вагон"
-	     "2 - Отцепить вагон"
-	 	num = gets.chomp
-
-	 create_wagon if num == "0"
-
-	 if num == "1"
-	 	puts "Добавить поезд к которому добавим вагон"
-	 	@trains.each_with_index {|element, index| puts "Поезд - #{element.num}, индекс - #{index}"}
-	 	train = @trains[gets.chomp.to_i]
-	 	add_wagon(train)
-	 end
-
-	 if num == "2"
-	 	puts "Отцепить вагон от поезда"
-	 	@trains.each_with_index {|element, index| puts "Поезд - #{element.num}, индекс - #{index}"}
-	 	train = @trains[gets.chomp.to_i]
-	 	delete_wagon(train)
-	 end
-end
-
-def move_train
-    puts "Вы зашли в отдел управления движениями. Выберите поезд по индексу для управления его движением"
-    @trains.each_with_index{|item, index| puts "индекс - #{index} - поезд -  #{item.num}"}
-    train = @trains[gets.chomp.to_i]
-    puts "Выберите действие, которое хотите осуществить"
-    puts """
-         1 - Ехать вперед
-         2 - Сдать назад
-        """
-    num = gets.chomp
-    num == 1? train.go_next_station : train.go_previous_station
-    puts "Поезд #{train.num} переместился со станции #{train.previous_station.name} на станцию #{train.current_station}" if num == "1"
-    puts "Поезд #{train.num} переместился со станции #{train.current_station} на станцию #{train.previous_station.name}" if num == "2"
-  end
-
-def show_stations
-	puts "Показ станций"
-	@stations.each {|i| puts "Станция - #{i.name}"}
-		puts "Наименование станции #{name}"
-end 
-
-def show_trains
-	puts "Показ поездов на станциях"
-	@stations.each_with_index {|element, index| 
-		puts "Поезд - #{element.name}, индекс - #{index}"}
-	station = @stations[gets.chomp.to_i]
-	station.trains.each{|train| puts "Номер поезда - #{train.num}"}
-end
-end
-
-foo = Main.new
-foo.start
-
-
-
-
-
-
-
+f = Main.new
+f.start
