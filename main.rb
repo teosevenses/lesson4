@@ -21,7 +21,7 @@ class Main
     	loop do
     		menu 
     		choice = gets.chomp
-    		break if choice == "9"
+    		break if choice == "99"
     		list(choice)
     	end		
 	end
@@ -40,7 +40,10 @@ class Main
 		6 - Список маршрутов
 		7 - Просматривать список станций
 		8 - Просматривать список поездов
-		9 - Выйти из меню
+		9 -  Назначать маршрут поезду
+		10 - Перемещать поезд по маршруту вперед
+		11 - Перемещать поезд по маршруту назад
+		99 - Выйти из меню
 		"
 	end
 
@@ -60,12 +63,16 @@ class Main
 		elsif choice == "7"
 			list_stations
 		elsif choice == "8"
-			trains.each do |x|
-				puts "Номер поезда #{x.num}, тип поезда #{x.type}" 
-			end
+			list_trains
+		elsif choice == "9"
+			assign_route
+		elsif choice == "10"
+			move_forward
+		elsif choice == "11"
+			move_back
+		end
 	end
 		
-	end
 
 	def create_station
 		puts "Введите название станции"
@@ -144,19 +151,62 @@ class Main
  		input = gets.chomp
  		route = routes[input.to_i]
 
- 		list_stations
- 		second_input = gets.chomp
- 		station = stations[second_input.to_i]
- 		
-		if route.stations.include?(station)
-     	route.delete_station(station)
-     	puts "Выбранная станция удалена из маршрута"
-  	 	else
-    	puts "Выбранная станция не найдена в выбранном маршруте"
+ 		route.list_stations
+ 		second_input = gets.chomp.to_i
+ 		deleted_station = route.stations.delete_at(second_input)
+ 		if deleted_station 
+ 			puts "Станция #{second_input} #{deleted_station.name} удалена"
+ 		else
+			puts "Станция под номером #{second_input} не найдена"
+		end
    	end
-   	
-   	end
+
+   	def assign_route
+   		puts "Выбрать маршрут"
+   		list_routes
+   		input = gets.chomp
+   		route = routes[input.to_i]
+
+   		puts "Выбрать поезд"
+   		list_trains
+   		second_input = gets.chomp.to_i
+   		train = trains[second_input]
+   		route.trains << train
+   		train.route = route
+   		train.station = 0
+   		puts "Выбранный поезд #{second_input} назначен на выбранный маршрут #{input}"
+	end
+
+	def list_trains
+ 		puts "Список поездов"
+ 		trains.each_with_index do |x, y|
+ 			puts "#{y} #{x.type}"
+ 		end
+ 	end
+
+ 	def move_forward
+ 		list_trains
+ 		input = gets.chomp.to_i
+ 		train = trains[input]
+		train.move_forward
+		puts "Поезд на следующей станции"
+ 	end
+
+ 	def move_back
+ 		list_trains
+ 		input = gets.chomp.to_i
+ 		train = trains[input]
+		train.move_back
+		puts "Поезд на предыдщей станции"
+	end
 end
 
 f = Main.new
 f.start
+
+
+
+
+
+
+
