@@ -3,3 +3,4 @@ class PassengerWagon < Wagon
 		@type = :passenger
 	end
 end
+ 
